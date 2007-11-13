@@ -6,21 +6,22 @@ from pygene.population import Population
 
 import random
 
+# pprint is very good to print out list,dicts for debug purposses
 import pprint
 
-#pygame
+#pygame imports
 import pygame, math, sys 
 from pygame.locals import * 
 
-import pgu.gui as pgui
+#import pgu.gui as pgui
 
-gridsize = 16
-
+# global variable to control the gridsize
+gridsize = 37
 
 class PatternGrid(object):
     ''' PatternGrid '''
     
-    def __init__(self,screen, gridsize=16):
+    def __init__(self,screen, gridsize=17):
         ''' __init__ create some attributes '''
         
         self.__screen = screen
@@ -52,7 +53,7 @@ class PatternGrid(object):
             #pprint.pprint(len(grid[col]))
             for row in xrange(self.__gridsize):
                 
-                if grid[col][row] == '1':
+                if grid[col][row] == '0':
                     # draw red block onto white background
                     self.__screen.blit(self.__block, (row*self.__cell_width,col*self.__cell_height) )
                     self.__screen.blit(self.__block, (self.__screen.get_width() - row * self.__cell_width, col*self.__cell_height) )
@@ -117,6 +118,7 @@ class PatternOrganism(MendelOrganism):
         
     
     def getGrid(self):
+        ''' returns the grid representation of the organism '''
         grid = []
         temp = []
         count = 0
@@ -125,6 +127,7 @@ class PatternOrganism(MendelOrganism):
             count += 1
             
             if count >= gridsize:
+                
                 grid.append(temp)
                 temp = []
                 count = 0
@@ -169,29 +172,37 @@ def main():
     #create 7-sub screens
     for i in range(6):
         # TODO add key;reference to a dict
-        s = screen.subsurface((10,y,200,100))
+        s = screen.subsurface((10,y,110,110))
         
-        subscreens[i] = PatternGrid(s)
+        subscreens[i] = PatternGrid(s,gridsize)
         y += 105
 
-    gen = 0
+    gen = 1
+    
+    mainscreen= PatternGrid(screen.subsurface((150,1,600,600)),gridsize)
     
    
     pop = PatternPopulation()
 
+    # fixed the flicker, but probably not pygame way!
+    render = True
 
     while True:
-        clock.tick(1)
+        clock.tick(30)
         #b = pop.getRandom()
         
         
-        #iterate through the population
-        for i in xrange(len(pop)):
-            #TODO: instead of printing it out using pygame to draw on screen
-            org = pop[i]
-            #print org
-            s = subscreens[i]
-            s.render(org.getGrid())
+        if render:
+        
+            #iterate through the population
+            for i in xrange(len(pop)):
+                #TODO: instead of printing it out using pygame to draw on screen
+                org = pop[i]
+                #print org
+                s = subscreens[i]
+                s.render(org.getGrid())
+                
+            render = False
             
         # TODO: handle pygame events   
         for event in pygame.event.get(): 
@@ -203,6 +214,12 @@ def main():
                     print "generation %s: " % gen
                     gen += 1
                     pop.gen()
+                    render = True
+                if event.key == K_DOWN:
+                    mainscreen.render(pop[0].getGrid())
+                    render = True
+                    
+        #pygame.display.flip()
 
 
 if __name__ == '__main__':
