@@ -2,4 +2,4 @@
 
 == Features to be implemented ==
 
-* Selection of PatternOrganisms via the mouse  
+*Selection of PatternOrganisms via the mouse  
