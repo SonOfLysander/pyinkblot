@@ -156,29 +156,32 @@ class PatternPopulation(Population):
 
 
 def main():
-    
-
     #main screen
     screen = pygame.display.set_mode((750, 640)) 
     
     subscreens = {}
     
+    # control FPS
     clock = pygame.time.Clock() 
 
     
-    #update the y position of the subscreens
+    #update the y position of the subsurface
     y = 1
 
-    #create 7-sub screens
+    #create 7-sub surface
     for i in range(6):
         # TODO add key;reference to a dict
         s = screen.subsurface((10,y,110,110))
         
         subscreens[i] = PatternGrid(s,gridsize)
+        
+        # increment the y co-ordinate
         y += 105
 
+    # generation counter
     gen = 1
     
+    # this subsurface will be used 
     mainscreen= PatternGrid(screen.subsurface((150,1,600,600)),gridsize)
     
    
@@ -192,11 +195,11 @@ def main():
         #b = pop.getRandom()
         
         
+        # do we need draw stuff?
         if render:
         
             #iterate through the population
             for i in xrange(len(pop)):
-                #TODO: instead of printing it out using pygame to draw on screen
                 org = pop[i]
                 #print org
                 s = subscreens[i]
@@ -209,12 +212,19 @@ def main():
             if event.type == QUIT:
                 return
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE: sys.exit(0)     # quit the game
+                # quit the game
+                if event.key == K_ESCAPE: sys.exit(0)
+                
+                # go to next Generation
                 if event.key == K_SPACE:
                     print "generation %s: " % gen
                     gen += 1
                     pop.gen()
+                    
+                    # render the screen
                     render = True
+                
+                #  just testing if i can display a Pattern in the main subscreen
                 if event.key == K_DOWN:
                     mainscreen.render(pop[0].getGrid())
                     render = True
