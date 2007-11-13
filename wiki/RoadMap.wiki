@@ -1,13 +1,7 @@
 #summary One-sentence summary of this page.
 
-= Introduction =
+= RoadMap =
 
-Add your content here.
+Features to be implemented 
 
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+* Selection of PatternOrganisms via the mouse  
