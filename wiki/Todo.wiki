@@ -1,6 +1,6 @@
 Just a list of things that i will like to do.
 
-== PyInkblot == 
+=== PyInkblot ===
 
 
   * instead of other square blocks use different shapes or images
@@ -9,7 +9,7 @@ Just a list of things that i will like to do.
   * ability to deselect selected organism's
   
 
-== Wiki ==
+=== Wiki ===
 
   * create a Installation page
   * create a ImplementationDetails page
