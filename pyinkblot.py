@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.4
+
 #pygene
 from pygene.gene import OrBitGene
 from pygene.gamete import Gamete
@@ -16,12 +18,12 @@ from pygame.locals import *
 #import pgu.gui as pgui
 
 # global variable to control the gridsize
-gridsize = 37
+gridsize = 6
 
 class PatternGrid(object):
     ''' PatternGrid '''
     
-    def __init__(self,screen, gridsize=17):
+    def __init__(self,screen,gridsize):
         ''' __init__ create some attributes '''
         
         self.__screen = screen
@@ -42,34 +44,39 @@ class PatternGrid(object):
             return
         
         
-       
-        #TODO instead of rendering own grid render one that is passed in!
-        
         # fill screen with black
         self.__screen.fill((0,0,0))
-        
+
+        #print "render | gridsize-->%d" %self.__gridsize
+
         # iterate through the grid
-        for col in xrange(self.__gridsize):
-            #pprint.pprint(len(grid[col]))
-            for row in xrange(self.__gridsize):
-                
+        for col in xrange(gridsize):
+            for row in xrange(gridsize):
+
                 if grid[col][row] == '0':
                     # draw red block onto white background
                     self.__screen.blit(self.__block, (row*self.__cell_width,col*self.__cell_height) )
-                    self.__screen.blit(self.__block, (self.__screen.get_width() - row * self.__cell_width, col*self.__cell_height) )
-        pygame.display.flip() 
+                    self.__screen.blit(self.__block, (self.__screen.get_width() - col*self.__cell_width, col*self.__cell_height) )
 
 
+#---------------------------------------------------------------------------
+#pygene 
 
 def newPattern(prob=0.5):
     ''' creates a new pattern grid '''
     grid = [[None for num in xrange(gridsize)] for x in xrange(gridsize)]
-    for col in xrange(gridsize):
+
+    half = gridsize/2 
+
+    for col in xrange(half):
         for row in xrange(gridsize):
-            if random.random() > prob:
-                grid[col][row] = '1'
-            else:
+            if random.random() >= prob:
                 grid[col][row] = '0'
+                grid[half+col][row] = '0'
+            else:
+                grid[col][row] = '1'
+                grid[half+col][row] = '1'
+    print "-"*80
     return grid
 
 
@@ -78,6 +85,7 @@ def genomeString(grid=None):
     if grid == None:
         grid = newPattern()
         
+    pprint.pprint(grid)
     genome = []
         
     for col in xrange(len(grid)):
@@ -85,25 +93,23 @@ def genomeString(grid=None):
             genome.append(grid[col][row])
     return "".join(genome)
 
-#---------------------------------------------------------------------------
-#pygene 
-
 class PatternGene(OrBitGene):
     mutProb = 0.1
     
     def __repr__(self):
-        print self.value
         return str(self.value)
 
 
 # create a genome string
 gs = genomeString()
 
+#print "gs|length --> %d" %len(gs)
+
 # dict to hold the genome
 genome = {}
 
 # for each of the 1/0 values in the string create a PatternGene
-for i in range(len(gs)):
+for i in xrange(len(gs)):
     genome[str(i)] = PatternGene
     
 class PatternOrganism(MendelOrganism):
@@ -122,19 +128,19 @@ class PatternOrganism(MendelOrganism):
         grid = []
         temp = []
         count = 0
+        print "getGrid|num of genes-->%d" %self.numgenes
         for i in xrange(self.numgenes):
             temp.append(str(self[i]))
             count += 1
             
             if count >= gridsize:
-                
                 grid.append(temp)
+                print '\ttemp-->%d' %len(temp)
                 temp = []
+
                 count = 0
 
-                temp.append(str(self[i]))
-                count += 1
-        
+        print len(grid)
         return grid
     
     def fitness(self):
@@ -157,7 +163,7 @@ class PatternPopulation(Population):
 
 def main():
     #main screen
-    screen = pygame.display.set_mode((750, 640)) 
+    screen = pygame.display.set_mode((760, 650)) 
     
     subscreens = {}
     
@@ -168,10 +174,10 @@ def main():
     #update the y position of the subsurface
     y = 1
 
-    #create 7-sub surface
+    #create 6-sub surface
     for i in range(6):
         # TODO add key;reference to a dict
-        s = screen.subsurface((10,y,110,110))
+        s = screen.subsurface((10,y,100,100))
         
         subscreens[i] = PatternGrid(s,gridsize)
         
@@ -179,10 +185,10 @@ def main():
         y += 105
 
     # generation counter
-    gen = 1
+    gen = 0
     
     # this subsurface will be used 
-    mainscreen= PatternGrid(screen.subsurface((150,1,600,600)),gridsize)
+    mainscreen= PatternGrid(screen.subsurface((150,1,500,550)),gridsize)
     
    
     pop = PatternPopulation()
@@ -195,7 +201,7 @@ def main():
         #b = pop.getRandom()
         
         
-        # do we need draw stuff?
+        # do we need draw stuff? Also this uses up less CPU
         if render:
         
             #iterate through the population
@@ -204,6 +210,8 @@ def main():
                 #print org
                 s = subscreens[i]
                 s.render(org.getGrid())
+
+            pygame.display.flip() 
                 
             render = False
             
@@ -217,18 +225,31 @@ def main():
                 
                 # go to next Generation
                 if event.key == K_SPACE:
-                    print "generation %s: " % gen
                     gen += 1
+                    print "generation %s: " % gen
                     pop.gen()
                     
                     # render the screen
                     render = True
                 
-                #  just testing if i can display a Pattern in the main subscreen
-                if event.key == K_DOWN:
+                if event.key == K_1:
                     mainscreen.render(pop[0].getGrid())
                     render = True
-                    
+                if event.key == K_2:
+                    mainscreen.render(pop[1].getGrid())
+                    render = True
+                if event.key == K_3:
+                    mainscreen.render(pop[2].getGrid())
+                    render = True
+                if event.key == K_4:
+                    mainscreen.render(pop[3].getGrid())
+                    render = True
+                if event.key == K_5:
+                    mainscreen.render(pop[4].getGrid())
+                    render = True
+                if event.key == K_6:
+                    mainscreen.render(pop[5].getGrid())
+                    render = True
         #pygame.display.flip()
 
 
