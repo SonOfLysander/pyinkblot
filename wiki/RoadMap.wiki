@@ -1,5 +1,0 @@
-= RoadMap =
-
-== Features to be implemented ==
-
-  * Selection of PatternOrganisms via the mouse  
