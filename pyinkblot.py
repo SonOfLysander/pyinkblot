@@ -18,12 +18,12 @@ from pygame.locals import *
 #import pgu.gui as pgui
 
 # global variable to control the gridsize
-gridsize = 6
+gridsize = 12
 
 class PatternGrid(object):
     ''' PatternGrid '''
     
-    def __init__(self,screen,gridsize):
+    def __init__(self,screen,gridsize,color=None):
         ''' __init__ create some attributes '''
         
         self.__screen = screen
@@ -34,7 +34,11 @@ class PatternGrid(object):
         
         # create a block size dependant on screen and gridsize
         self.__block = pygame.Surface((self.__cell_width,self.__cell_height))
-        self.__block.fill(( random.random()*255,random.random()*255,random.random()*255))
+        if color == None:
+            self.__color = ( random.random()*255,random.random()*255,random.random()*255)
+        else:
+            self.__color = color
+        self.__block.fill(color)
         
     def render(self,grid = None):
         ''' render the grid onto the screen '''
@@ -56,7 +60,7 @@ class PatternGrid(object):
                 if grid[col][row] == '0':
                     # draw red block onto white background
                     self.__screen.blit(self.__block, (row*self.__cell_width,col*self.__cell_height) )
-                    self.__screen.blit(self.__block, (self.__screen.get_width() - col*self.__cell_width, col*self.__cell_height) )
+                    self.__screen.blit(self.__block, (self.__screen.get_width() - (row * self.__cell_width)-self.__cell_width, col*self.__cell_height) )
 
 
 #---------------------------------------------------------------------------
@@ -76,7 +80,6 @@ def newPattern(prob=0.5):
             else:
                 grid[col][row] = '1'
                 grid[half+col][row] = '1'
-    print "-"*80
     return grid
 
 
@@ -85,7 +88,7 @@ def genomeString(grid=None):
     if grid == None:
         grid = newPattern()
         
-    pprint.pprint(grid)
+    #pprint.pprint(grid)
     genome = []
         
     for col in xrange(len(grid)):
@@ -128,19 +131,19 @@ class PatternOrganism(MendelOrganism):
         grid = []
         temp = []
         count = 0
-        print "getGrid|num of genes-->%d" %self.numgenes
+        #print "getGrid|num of genes-->%d" %self.numgenes
         for i in xrange(self.numgenes):
             temp.append(str(self[i]))
             count += 1
             
             if count >= gridsize:
                 grid.append(temp)
-                print '\ttemp-->%d' %len(temp)
+                #print '\ttemp-->%d' %len(temp)
                 temp = []
 
                 count = 0
 
-        print len(grid)
+        #print len(grid)
         return grid
     
     def fitness(self):
@@ -163,7 +166,7 @@ class PatternPopulation(Population):
 
 def main():
     #main screen
-    screen = pygame.display.set_mode((760, 650)) 
+    screen = pygame.display.set_mode((800, 650)) 
     
     subscreens = {}
     
@@ -174,12 +177,15 @@ def main():
     #update the y position of the subsurface
     y = 1
 
+
+    colors = ( (155,127,223),(50,50,50),(20,20,20),(30,40,50),(100,100,100),(125,50,5),(69,69,69) )
+
     #create 6-sub surface
     for i in range(6):
         # TODO add key;reference to a dict
-        s = screen.subsurface((10,y,100,100))
+        s = screen.subsurface((1,y,110,100))
         
-        subscreens[i] = PatternGrid(s,gridsize)
+        subscreens[i] = PatternGrid(s,gridsize,colors[i])
         
         # increment the y co-ordinate
         y += 105
@@ -188,13 +194,16 @@ def main():
     gen = 0
     
     # this subsurface will be used 
-    mainscreen= PatternGrid(screen.subsurface((150,1,500,550)),gridsize)
+    mainscreen= PatternGrid(screen.subsurface((150,1,600,550)),gridsize,colors[-1])
     
    
     pop = PatternPopulation()
 
     # fixed the flicker, but probably not pygame way!
     render = True
+
+    #selected index
+    selected = 0
 
     while True:
         clock.tick(30)
@@ -229,25 +238,32 @@ def main():
                     print "generation %s: " % gen
                     pop.gen()
                     
+                    mainscreen.render(pop[selected].getGrid())
                     # render the screen
                     render = True
                 
                 if event.key == K_1:
+                    selected = 0
                     mainscreen.render(pop[0].getGrid())
                     render = True
                 if event.key == K_2:
+                    selected = 1
                     mainscreen.render(pop[1].getGrid())
                     render = True
                 if event.key == K_3:
+                    selected = 2
                     mainscreen.render(pop[2].getGrid())
                     render = True
                 if event.key == K_4:
+                    selected = 3
                     mainscreen.render(pop[3].getGrid())
                     render = True
                 if event.key == K_5:
+                    selected = 4
                     mainscreen.render(pop[4].getGrid())
                     render = True
                 if event.key == K_6:
+                    selected = 5
                     mainscreen.render(pop[5].getGrid())
                     render = True
         #pygame.display.flip()
