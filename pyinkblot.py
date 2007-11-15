@@ -163,6 +163,14 @@ class PatternPopulation(Population):
     mutants = 0.25
     
 
+def selectOrg(selected, selectedPatterns, pop):
+    if selected >=0:
+        org = pop[selected]
+        if org not in selectedPatterns:
+            selectedPatterns.append(pop[selected])
+            print "%d selected" %(selected+1)
+        else:
+            print "%d already selected!" %(selected+1)
 
 def main():
     #main screen
@@ -203,12 +211,12 @@ def main():
     render = True
 
     #selected index
-    selected = 0
+    selected = -1
+
+    selectedPatterns = []
 
     while True:
         clock.tick(30)
-        #b = pop.getRandom()
-        
         
         # do we need draw stuff? Also this uses up less CPU
         if render:
@@ -224,7 +232,7 @@ def main():
                 
             render = False
             
-        # TODO: handle pygame events   
+        # handle pygame events   
         for event in pygame.event.get(): 
             if event.type == QUIT:
                 return
@@ -234,26 +242,48 @@ def main():
                 
                 # go to next Generation
                 if event.key == K_SPACE:
-                    gen += 1
-                    print "generation %s: " % gen
-                    pop.gen()
+
+                    # check if we have things that are selected
+                    if selectedPatterns:
+                        # create an empty population
+                        pop = PatternPopulation(init=0)
+
+                        for org in selectedPatterns:
+                            pop.add(org)
+
+                        # TODO: fix the harcoded organism count
+                        moreOrg =  6-len(selectedPatterns)
+                        if moreOrg > 0:
+                            for i in xrange(moreOrg):
+                                pop.add(PatternOrganism())
+
+                        selectedPatterns = []
+                        selected = -1
+                    else:
+                        gen += 1
+                        print "generation %s: " % gen
+                        pop.gen()
                     
                     mainscreen.render(pop[selected].getGrid())
                     # render the screen
                     render = True
                 
+                # handle the display of the selected patterns
                 if event.key == K_1:
                     selected = 0
                     mainscreen.render(pop[0].getGrid())
                     render = True
+                    selectOrg(selected,selectedPatterns,pop)
                 if event.key == K_2:
                     selected = 1
                     mainscreen.render(pop[1].getGrid())
                     render = True
+                    selectOrg(selected,selectedPatterns,pop)
                 if event.key == K_3:
                     selected = 2
                     mainscreen.render(pop[2].getGrid())
                     render = True
+                    selectOrg(selected,selectedPatterns,pop)
                 if event.key == K_4:
                     selected = 3
                     mainscreen.render(pop[3].getGrid())
@@ -266,6 +296,9 @@ def main():
                     selected = 5
                     mainscreen.render(pop[5].getGrid())
                     render = True
+
+                # select
+                #if event.key == K_s:
         #pygame.display.flip()
 
 
