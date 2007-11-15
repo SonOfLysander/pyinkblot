@@ -7,6 +7,8 @@ from pygene.organism import Organism, MendelOrganism
 from pygene.population import Population
 
 import random
+import os
+import glob
 
 # pprint is very good to print out list,dicts for debug purposses
 import pprint
@@ -19,6 +21,8 @@ from pygame.locals import *
 
 # global variable to control the gridsize
 gridsize = 12
+
+__author__ = "Bulkan Evcimen"
 
 class PatternGrid(object):
     ''' PatternGrid '''
@@ -39,6 +43,12 @@ class PatternGrid(object):
         else:
             self.__color = color
         self.__block.fill(color)
+
+    def getScreen(self):
+        return self.__screen
+
+    def clear(self):
+        self.__screen.fill((0,0,0))
         
     def render(self,grid = None):
         ''' render the grid onto the screen '''
@@ -163,14 +173,43 @@ class PatternPopulation(Population):
     mutants = 0.25
     
 
-def selectOrg(selected, selectedPatterns, pop):
-    if selected >=0:
-        org = pop[selected]
-        if org not in selectedPatterns:
-            selectedPatterns.append(pop[selected])
-            print "%d selected" %(selected+1)
+def selectOrg(newSelected,sPatterns=None, pop=None):
+    #if selected == newSelected:
+    #    print "%d \t %d " %(selected,newSelected)
+    #    return
+
+    org = pop[newSelected]
+
+    if len(sPatterns) == 0:
+        sPatterns.append(org)
+        print "Organism %d selected" %(newSelected+1)
+    else:
+        for o in sPatterns:
+            #print type(o),id(o),id(org)
+            if str(o) == str(org):
+                print "Organism %d already selected!" %(newSelected+1)
+                return
+        sPatterns.append(org)
+    #    pprint.pprint(sPatterns)
+    #pprint.pprint(sPatterns)
+
+def save(Surface):
+    ''' Save the Surface as a PNG to the images folder '''
+    try:
+        os.chdir('images')
+    except OSError:
+        os.mkdir('images')
+        os.chdir('images')
+    globret = glob.glob('*.png')
+    count = 1
+    while 1:
+        if str(count)+".png" not in globret:
+            break
         else:
-            print "%d already selected!" %(selected+1)
+            count += 1
+    print "saving %s" %(str(count)+".png")
+    pygame.image.save(Surface, str(count) + '.png')
+    os.chdir('..')
 
 def main():
     #main screen
@@ -186,7 +225,8 @@ def main():
     y = 1
 
 
-    colors = ( (155,127,223),(50,50,50),(20,20,20),(30,40,50),(100,100,100),(125,50,5),(69,69,69) )
+    # list of colours
+    colors = ( (155,127,223),(60,150,50),(20,60,20),(30,40,50),(100,100,100),(125,50,5),(169,69,69) )
 
     #create 6-sub surface
     for i in range(6):
@@ -245,60 +285,79 @@ def main():
 
                     # check if we have things that are selected
                     if selectedPatterns:
+                        
                         # create an empty population
                         pop = PatternPopulation(init=0)
 
                         for org in selectedPatterns:
                             pop.add(org)
 
+                        #print 'moreOrg --> %d\nselectedPatterns --> %d' %(moreOrg,len(selectedPatterns))
+
                         # TODO: fix the harcoded organism count
                         moreOrg =  6-len(selectedPatterns)
+                        #print 'moreOrg --> %d' %moreOrg
+
+                        # do we need to add more organism's?
                         if moreOrg > 0:
                             for i in xrange(moreOrg):
                                 pop.add(PatternOrganism())
 
+                        # reset some variables
                         selectedPatterns = []
                         selected = -1
+                        gen = 0
+                        pop.gen()
                     else:
                         gen += 1
                         print "generation %s: " % gen
                         pop.gen()
                     
-                    mainscreen.render(pop[selected].getGrid())
+                    mainscreen.clear()
                     # render the screen
                     render = True
                 
                 # handle the display of the selected patterns
                 if event.key == K_1:
-                    selected = 0
                     mainscreen.render(pop[0].getGrid())
                     render = True
-                    selectOrg(selected,selectedPatterns,pop)
+                    selectOrg(0,selectedPatterns,pop)
+                    selected = 0
+
                 if event.key == K_2:
-                    selected = 1
                     mainscreen.render(pop[1].getGrid())
                     render = True
-                    selectOrg(selected,selectedPatterns,pop)
+                    selectOrg(1,selectedPatterns,pop)
+                    selected = 1
+
                 if event.key == K_3:
-                    selected = 2
                     mainscreen.render(pop[2].getGrid())
                     render = True
-                    selectOrg(selected,selectedPatterns,pop)
+                    selectOrg(2,selectedPatterns,pop)
+                    selected = 2
+
                 if event.key == K_4:
-                    selected = 3
                     mainscreen.render(pop[3].getGrid())
                     render = True
+                    selectOrg(3,selectedPatterns,pop)
+                    selected = 3
+
                 if event.key == K_5:
-                    selected = 4
                     mainscreen.render(pop[4].getGrid())
                     render = True
+                    selectOrg(4,selectedPatterns,pop)
+                    selected = 4
+
                 if event.key == K_6:
-                    selected = 5
                     mainscreen.render(pop[5].getGrid())
                     render = True
+                    selectOrg(5,selectedPatterns,pop)
+                    selected = 5
+
 
                 # select
-                #if event.key == K_s:
+                if event.key == K_s:
+                    save(mainscreen.getScreen())
         #pygame.display.flip()
 
 
