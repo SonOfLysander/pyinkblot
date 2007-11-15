@@ -1,5 +1,3 @@
-= Todo =
-
 Just a list of things that i will like to do.
 
 == PyInkblot == 
